@@ -48,7 +48,7 @@ It is used under its free/unpaid usage terms.
 
 3. Configure the database connection string in `appsettings.json`.
 
-4. Apply migrations (if applicable):
+4. Apply migrations:
 
    ```
    dotnet ef database update
