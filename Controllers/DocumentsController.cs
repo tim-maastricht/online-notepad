@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -64,7 +65,12 @@ namespace OnlineNotePad.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", document.UserId);
+
+            if (document.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return NotFound();
+            }
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", document.UserId);
             return View(document);
         }
 
@@ -116,6 +122,11 @@ namespace OnlineNotePad.Controllers
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (document == null)
+            {
+                return NotFound();
+            }
+
+            if (document.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
             {
                 return NotFound();
             }
