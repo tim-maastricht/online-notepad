@@ -25,15 +25,18 @@ namespace OnlineNotePad.Controllers
         // GET: Documents
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Documents.Include(d => d.User);
-            return View(await applicationDbContext.ToListAsync());
+            // only load documents that belong to the current user
+            var applicationDbContext = from c in _context.Documents select c;
+            applicationDbContext = applicationDbContext.Where(a => a.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // this is known as eager loading, we load the user data at the same time as the document data to avoid multiple database calls
+            return View(await applicationDbContext.Include(d => d.User).ToListAsync());
         }
 
 
         // GET: Documents/Create
         public IActionResult Create()
         {
-            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
@@ -50,7 +53,6 @@ namespace OnlineNotePad.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", document.UserId);
             return View(document);
         }
 
@@ -72,7 +74,6 @@ namespace OnlineNotePad.Controllers
             {
                 return NotFound();
             }
-            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", document.UserId);
             return View(document);
         }
 
